@@ -15,17 +15,23 @@ class SessionController {
       return res.status(401).json({ error: 'Invalid or insufficient data' });
     };
 
+    const { email, password } = req.body;
+
     const user = await User.findOne({
-      where: { email: req.body.email }
+      where: { email }
     })
 
     if (!user) {
       return res.status(401).json({ error: 'User not found' });
     }
 
-    const { id, name, email } = user;
+    if (!(await user.checkPassword(password))) {
+      return res.status(401).json({ error: 'Invalid password' });
+    }
 
-    return res.json({
+    const { id, name } = user;
+
+    return res.status(200).json({
       user: { 
         id, 
         name, 
